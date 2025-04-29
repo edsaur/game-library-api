@@ -14,6 +14,14 @@ To set up and use the Game Library API with Authentication, ensure you have the 
 -   Postman (or any API testing tool)
     
 
+## Third Party Packages used:
+- bcrypt
+- jsonwebtoken
+- express-validator
+- express
+- nodemon
+- dotenv
+
 ## Installing Dependencies
 
 Run the following command in your terminal to install all required dependencies:
