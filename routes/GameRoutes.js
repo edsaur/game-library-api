@@ -1,11 +1,13 @@
 import express from "express";
 import { createGame, deleteGame, getAllGames, getGamesBySearch, updateGame } from "../controllers/GameController.js";
 import {body, param} from "express-validator";
+import { protect } from "../middlewares/authMiddleware.js";
+
 
 const gameRouter = express.Router();
 
 // Create new game
-gameRouter.post('/', [
+gameRouter.post('/', protect, [
     body('title').not().isEmpty().withMessage('Title is required'),
     body('genre').not().isEmpty().withMessage('Genre is required'),
     body('platform').not().isEmpty().withMessage('Platform is required'),
@@ -14,12 +16,12 @@ gameRouter.post('/', [
 ], createGame);
 
 // Update game
-gameRouter.put('/:id', [
+gameRouter.put('/:id', protect, [
     param('id').isMongoId().withMessage('Invalid ID format'),
 ], updateGame);
 
 // Delete game
-gameRouter.delete('/:id', [
+gameRouter.delete('/:id', protect, [
     param('id').isMongoId().withMessage('Invalid ID format'),
 ], deleteGame);
 
