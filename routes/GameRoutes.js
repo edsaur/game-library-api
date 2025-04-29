@@ -7,6 +7,7 @@ import { protect } from "../middlewares/authMiddleware.js";
 const gameRouter = express.Router();
 
 // Create new game
+    // protect is the middleware to check authorization
 gameRouter.post('/', protect, [
     body('title').not().isEmpty().withMessage('Title is required'),
     body('genre').not().isEmpty().withMessage('Genre is required'),
