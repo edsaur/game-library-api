@@ -1,5 +1,6 @@
 import Users from "../models/Users.js";
 import jwt from "jsonwebtoken";
+import { validationResult } from "express-validator";
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -8,6 +9,12 @@ const generateToken = (id) => {
 };
 
 export const createUser = async (req, res) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   try {
     const { username, email, password } = req.body;
 
@@ -29,6 +36,12 @@ export const createUser = async (req, res) => {
 };
 
 export const loginUser = async (req, res) => {
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
 
   const { email, password } = req.body;
 
