@@ -22,9 +22,12 @@ export const updateGame = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
 
   try {
-    const game = await Games.findOneAndUpdate(req.params.title, req.body, {
+    const game = await Games.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
+    if (!game) {
+      return res.status(404).json({ message: "Game not found" });
+    }
     res.status(200).json(game);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -38,7 +41,12 @@ export const deleteGame = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
 
   try {
-    const game = await Games.findOneAndDelete(req.params.title);
+    const game = await Games.findByIdAndDelete(req.params.id);
+
+    if (!game) {
+      return res.status(404).json({ message: "Game not found" });
+    }
+
     res.status(200).json(game);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -55,52 +63,42 @@ export const getAllGames = async (req, res) => {
   }
 };
 
-// Get a single game by name
-export const getGameByName = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty())
-    return res.status(400).json({ errors: errors.array() });
-  try {
-    const game = await Games.findOne({ title: req.params.title });
-    res.status(200).json(game);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+// Get games by search
+export const getGamesBySearch = async (req, res) => {
+  const { title, genre, platform, releaseYear } = req.query;
 
-
-export const getGamesByGenre = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty())
-    return res.status(400).json({ errors: errors.array() });
   try {
-    const games = await Games.find({ genre: req.params.genre });
+    let filter = {};
+
+    if (title) {
+      filter.title = { $regex: title, $options: "i" };
+    }
+
+    if (genre) {
+      const genresArray = genre.split(",").map((g) => g.trim());
+      filter.genre = { $regex: genresArray.join("|"), $options: "i" };
+    }
+
+    if (platform) {
+      const platformsArray = platform.split(",").map((p) => p.trim());
+      filter.platform = { $regex: platformsArray.join("|"), $options: "i" };
+    }
+
+    if (releaseYear) {
+      filter.releaseYear = releaseYear;
+    }
+
+    const games = await Games.find(filter);
+
+    if (games.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No games found matching your search criteria." });
+    }
+
     res.status(200).json(games);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-export const getGamesByPlatform = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty())
-    return res.status(400).json({ errors: errors.array() });
-  try {
-    const games = await Games.find({ platform: req.params.platform });
-    res.status(200).json(games);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-export const getGamesByReleaseYear = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty())
-    return res.status(400).json({ errors: errors.array() });
-  try {
-    const games = await Games.find({ releaseYear: req.params.releaseYear });
-    res.status(200).json(games);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
